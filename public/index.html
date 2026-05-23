@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reward Arcade MVP</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #090b0f;
+        --surface: #14100b;
+        --panel: rgba(27, 22, 16, 0.92);
+        --panel-2: rgba(43, 31, 18, 0.94);
+        --ink: #fff7df;
+        --muted: #d8c7a2;
+        --line: rgba(255, 206, 110, 0.28);
+        --brand: #f6a72a;
+        --brand-2: #f05d2f;
+        --good: #22b66f;
+        --blue: #3d8df7;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+      }
+
+      body.light {
+        color-scheme: light;
+        --bg: #f4f6f8;
+        --surface: #ffffff;
+        --panel: #ffffff;
+        --panel-2: #fff5df;
+        --ink: #18222a;
+        --muted: #62707a;
+        --line: #d8e0e7;
+        --brand: #0d735a;
+        --brand-2: #1f63a7;
+        --good: #0b8f55;
+        --blue: #1f63a7;
+        --shadow: 0 14px 32px rgba(20, 34, 44, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(246, 167, 42, 0.28), transparent 34%),
+          linear-gradient(180deg, #10141a 0%, var(--bg) 46%, #050608 100%);
+      }
+
+      body.light {
+        background:
+          radial-gradient(circle at top left, rgba(13, 115, 90, 0.12), transparent 34%),
+          linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+      }
+
+      .app {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        padding: 14px;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: -14px -14px 14px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(7, 9, 12, 0.88);
+        backdrop-filter: blur(14px);
+      }
+
+      body.light header {
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .topbar {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .icon-button,
+      .mini-select {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .icon-button {
+        width: 44px;
+        cursor: pointer;
+      }
+
+      .title {
+        justify-self: center;
+        min-height: 42px;
+        padding: 9px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        font-size: 18px;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .mini-select {
+        padding: 0 9px;
+        cursor: pointer;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        min-height: 270px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background:
+          linear-gradient(135deg, rgba(255, 209, 119, 0.22), transparent 48%),
+          var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .player-card,
+      .balance-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 56px;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      body.light .player-card,
+      body.light .balance-card {
+        background: #f7fafb;
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        font-size: 22px;
+      }
+
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .value {
+        display: block;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .balance-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
+
+      button {
+        min-height: 42px;
+        padding: 10px 13px;
+        border: 0;
+        border-radius: 10px;
+        color: #111;
+        background: var(--brand);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        color: #fff;
+        background: var(--brand-2);
+      }
+
+      button.ghost {
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: var(--panel);
+      }
+
+      .brand-stage {
+        display: grid;
+        place-items: center;
+        min-height: 152px;
+        padding: 20px 0 8px;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(34px, 8vw, 70px);
+        line-height: 0.92;
+        text-shadow: 0 5px 0 rgba(0, 0, 0, 0.24);
+      }
+
+      body.light h1 {
+        text-shadow: none;
+      }
+
+      .tagline {
+        max-width: 650px;
+        margin: 10px auto 0;
+        color: var(--muted);
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin: 14px 0;
+      }
+
+      .quick {
+        min-height: 78px;
+        padding: 10px 8px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        color: var(--ink);
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+
+      .quick-icon {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 26px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: end;
+        margin: 20px 0 10px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .game-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .game-card {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(246, 167, 42, 0.9);
+        border-radius: 16px;
+        background: var(--panel-2);
+        box-shadow: var(--shadow);
+      }
+
+      .badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        padding: 5px 8px;
+        border-radius: 8px;
+        color: #fff;
+        background: #ef4444;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .badge.new {
+        background: #15a85f;
+      }
+
+      .game-art {
+        height: 132px;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.72), transparent 18%),
+          linear-gradient(135deg, var(--art-a), var(--art-b));
+        font-size: 54px;
+      }
+
+      .game-body {
+        padding: 12px;
+      }
+
+      .game-title {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .game-desc {
+        min-height: 42px;
+        margin: 0 0 10px;
+        color: var(--muted);
+        line-height: 1.45;
+        font-size: 14px;
+      }
+
+      .drawer {
+        display: none;
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .drawer.active {
+        display: block;
+      }
+
+      .drawer-inner {
+        padding: 14px;
+      }
+
+      .wheel-wrap {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .wheel {
+        position: relative;
+        width: 240px;
+        aspect-ratio: 1;
+        border: 10px solid rgba(246, 167, 42, 0.95);
+        border-radius: 50%;
+        background: conic-gradient(
+          #f97316 0deg 60deg,
+          #facc15 60deg 120deg,
+          #22c55e 120deg 180deg,
+          #38bdf8 180deg 240deg,
+          #8b5cf6 240deg 300deg,
+          #ef4444 300deg 360deg
+        );
+        box-shadow: var(--shadow);
+        transition: transform 2200ms cubic-bezier(.12,.78,.12,1);
+      }
+
+      .wheel::before {
+        content: "";
+        position: absolute;
+        inset: 18%;
+        border-radius: 50%;
+        background: var(--panel);
+        border: 1px solid var(--line);
+      }
+
+      .wheel::after {
+        content: "◎";
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        font-size: 42px;
+        font-weight: 900;
+      }
+
+      .pointer {
+        width: 0;
+        height: 0;
+        margin: 0 auto -12px;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-top: 26px solid var(--ink);
+        position: relative;
+        z-index: 2;
+      }
+
+      .contact-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .contact-link {
+        display: block;
+        min-height: 44px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--ink);
+        background: var(--panel-2);
+        font-weight: 900;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .footer-note {
+        margin: 18px 0 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        color: var(--muted);
+        text-align: center;
+        line-height: 1.55;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0 6px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 16px;
+      }
+
+      pre {
+        max-height: 360px;
+        overflow: auto;
+        margin: 12px 0 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: #05080c;
+        color: #d8f3e6;
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+
+      body.light pre {
+        background: #111820;
+      }
+
+      @media (max-width: 860px) {
+        .topbar {
+          grid-template-columns: auto 1fr auto;
+        }
+
+        .quick-actions {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .game-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          padding: 10px;
+        }
+
+        header {
+          margin: -10px -10px 10px;
+          padding: 10px;
+        }
+
+        .title {
+          font-size: 15px;
+        }
+
+        .hero-grid,
+        .form-grid,
+        .contact-strip,
+        .game-grid,
+        .wheel-wrap {
+          grid-template-columns: 1fr;
+        }
+
+        .quick-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .balance-actions {
+          justify-content: stretch;
+        }
+
+        .balance-actions button {
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <button class="icon-button" id="closeBtn" title="Close">×</button>
+        <div class="title" data-i18n="appName">Reward Gateway</div>
+        <div class="toolbar">
+          <button class="mini-select" id="themeToggle">Gold</button>
+          <button class="mini-select" id="langToggle">中文</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="app">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="player-card">
+            <div class="avatar">◆</div>
+            <div>
+              <span class="label" data-i18n="member">Member</span>
+              <span class="value" id="memberId">Guest-0001</span>
+            </div>
+          </div>
+          <div>
+            <div class="balance-card">
+              <div class="avatar">◎</div>
+              <div>
+                <span class="label" data-i18n="redeemable">Redeemable Points</span>
+                <span class="value"><span id="points">0</span> pts</span>
+              </div>
+            </div>
+            <div class="balance-actions">
+              <button id="loginOpen" data-i18n="login">Claim Pass</button>
+              <button class="secondary" id="redeemOpen" data-i18n="redeem">Redeem</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="brand-stage">
+          <div>
+            <h1 data-i18n="headline">REWARD<br>ARCADE</h1>
+            <p class="tagline" data-i18n="tagline">A mini app lobby for rewards, tasks, tickets, and future wallet-powered games.</p>
+          </div>
+        </div>
+      </section>
+
+      <nav class="quick-actions" aria-label="Quick actions">
+        <button class="quick" data-drawer="service"><span class="quick-icon">☏</span><span data-i18n="service">Service</span></button>
+        <button class="quick" data-drawer="record"><span class="quick-icon">☷</span><span data-i18n="record">Record</span></button>
+        <button class="quick" data-drawer="daily"><span class="quick-icon">◈</span><span data-i18n="daily">Daily</span></button>
+        <button class="quick" data-drawer="store"><span class="quick-icon">▣</span><span data-i18n="store">Store</span></button>
+        <button class="quick" data-drawer="spin"><span class="quick-icon">◉</span><span data-i18n="luckySpin">Lucky Spin</span></button>
+      </nav>
+
+      <section class="drawer" id="loginDrawer">
+        <div class="drawer-inner">
+          <h2 data-i18n="loginTitle">Claim My Pass</h2>
+          <p class="hint" data-i18n="loginHint">Save your rewards and get your referral code. Wallet login can be connected later.</p>
+          <div class="form-grid">
+            <div>
+              <label for="email" data-i18n="email">Email</label>
+              <input id="email" type="email" placeholder="player@example.com">
+            </div>
+            <div>
+              <label for="inviteCode" data-i18n="inviteCode">Invite Code</label>
+              <input id="inviteCode" placeholder="REF-0001">
+            </div>
+          </div>
+          <div class="balance-actions">
+            <button id="saveMember" data-i18n="saveMember">Claim Pass</button>
+            <button class="ghost" id="mockMiniApp" data-i18n="miniApp">Mini App Entry</button>
+          </div>
+          <p class="success" id="referralLine" hidden></p>
+        </div>
+      </section>
+
+      <section class="drawer" id="redeemDrawer">
+        <div class="drawer-inner">
+          <h2 data-i18n="redeemTitle">Redeem Center</h2>
+          <p class="hint" data-i18n="redeemHint">Placeholder for future redemption: credits, coupons, NFT pass, or campaign rewards. No gambling payout logic is implemented.</p>
+          <div class="form-grid">
+            <div>
+              <label data-i18n="tickets">Tickets</label>
+              <input id="tickets" readonly>
+            </div>
+            <div>
+              <label data-i18n="wallet">Wallet Placeholder</label>
+              <input id="wallet" placeholder="Base smart wallet later">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="drawer" id="spinDrawer">
+        <div class="drawer-inner">
+          <h2 data-i18n="spinTitle">Daily Spin</h2>
+          <p class="hint" data-i18n="spinHint">Core clone module. Every version can change rewards, but keeps points, tickets, and referral tracking.</p>
+          <div class="wheel-wrap">
+            <div>
+              <div class="pointer"></div>
+              <div class="wheel" id="wheel"></div>
+            </div>
+            <div>
+              <h3 id="spinReward">Ready</h3>
+              <p class="hint" id="spinText">Spin to win points or tickets.</p>
+              <div class="balance-actions">
+                <button id="spinNow" data-i18n="spinNow">Spin Now</button>
+                <button class="ghost" id="spinRules" data-i18n="spinRules">Rules</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="drawer" id="quickDrawer">
+        <div class="drawer-inner">
+          <h2 id="quickTitle">Panel</h2>
+          <p class="hint" id="quickText">Reserved panel.</p>
+          <div class="contact-strip" id="quickContact" hidden>
+            <a class="contact-link" href="https://t.me/richmrking" target="_blank" rel="noreferrer">TG @richmrking</a>
+            <a class="contact-link" href="mailto:lovekry19950411@gmail.com">lovekry19950411@gmail.com</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="gamesTitle">Game Lobby</h2>
+          <p class="hint" data-i18n="gamesHint">Cards are plug-in slots. We can replace each with a real API, payment flow, or mini game later.</p>
+        </div>
+      </div>
+
+      <section class="game-grid" id="gameGrid"></section>
+
+      <section class="drawer active" id="outputDrawer">
+        <div class="drawer-inner">
+          <h2 data-i18n="status">Status</h2>
+          <pre id="output">Ready. Choose a card or login with email.</pre>
+        </div>
+      </section>
+
+      <footer class="footer-note">
+        <strong data-i18n="partnerTitle">Partner / API / Ad Slot Cooperation</strong><br>
+        <span data-i18n="partnerText">For zone placement, campaign traffic, API game slots, or reward gateway cooperation:</span><br>
+        TG <a href="https://t.me/richmrking" target="_blank" rel="noreferrer">@richmrking</a> ·
+        <a href="mailto:lovekry19950411@gmail.com">lovekry19950411@gmail.com</a>
+      </footer>
+    </div>
+
+    <script>
+      const i18n = {
+        en: {
+          appName: 'Reward Gateway',
+          member: 'Member',
+          redeemable: 'Redeemable Points',
+          login: 'Claim Pass',
+          redeem: 'Redeem',
+          headline: 'REWARD<br>ARCADE',
+          tagline: 'A mini app lobby for rewards, tasks, tickets, and future wallet-powered games.',
+          service: 'Service',
+          record: 'Record',
+          daily: 'Daily',
+          store: 'Store',
+          luckySpin: 'Lucky Spin',
+          loginTitle: 'Claim My Pass',
+          loginHint: 'Save your rewards and get your referral code. Wallet login can be connected later.',
+          email: 'Email',
+          inviteCode: 'Invite Code',
+          saveMember: 'Claim Pass',
+          miniApp: 'Mini App Entry',
+          redeemTitle: 'Redeem Center',
+          redeemHint: 'Placeholder for future redemption: credits, coupons, NFT pass, or campaign rewards. No gambling payout logic is implemented.',
+          tickets: 'Tickets',
+          wallet: 'Wallet Placeholder',
+          gamesTitle: 'Game Lobby',
+          gamesHint: 'Cards are plug-in slots. We can replace each with a real API, payment flow, or mini game later.',
+          status: 'Status',
+          spinTitle: 'Daily Spin',
+          spinHint: 'Core clone module. Every version can change rewards, but keeps points, tickets, and referral tracking.',
+          spinNow: 'Spin Now',
+          spinRules: 'Rules',
+          partnerTitle: 'Partner / API / Ad Slot Cooperation',
+          partnerText: 'For zone placement, campaign traffic, API game slots, or reward gateway cooperation:'
+        },
+        zh: {
+          appName: '獎勵入口',
+          member: '會員',
+          redeemable: '可兌換分數',
+          login: '領取通行證',
+          redeem: '兌換',
+          headline: '獎勵<br>大廳',
+          tagline: '用於任務、票券、兌換與未來錢包遊戲的 Mini App 入口。',
+          service: '客服',
+          record: '紀錄',
+          daily: '每日',
+          store: '商店',
+          luckySpin: '幸運轉盤',
+          loginTitle: '領取我的通行證',
+          loginHint: '保存你的獎勵並取得專屬推薦碼。錢包登入之後再接。',
+          email: '信箱',
+          inviteCode: '推薦碼',
+          saveMember: '領取通行證',
+          miniApp: 'Mini App 入口',
+          redeemTitle: '兌換中心',
+          redeemHint: '先預留未來兌換：點數、優惠、NFT Pass 或活動獎勵。目前沒有實作賭博提現邏輯。',
+          tickets: '票券',
+          wallet: '錢包預留',
+          gamesTitle: '遊戲大廳',
+          gamesHint: '每張卡都是可插入位置。之後可替換成真 API、支付流程或小遊戲。',
+          status: '狀態',
+          spinTitle: '每日轉盤',
+          spinHint: '克隆母版核心模組。每個版本可換獎勵內容，但保留點數、票券與推薦追蹤。',
+          spinNow: '立即轉',
+          spinRules: '規則',
+          partnerTitle: '合作 / API / 廣告位洽談',
+          partnerText: '入口版位、活動導流、API 遊戲插槽、Reward Gateway 合作請聯繫：'
+        }
+      };
+
+      const gameCopy = {
+        en: [
+          ['HOT', 'Lucky Box', 'Open boxes with tickets. Placeholder for reward logic.', '▰', '#ff7a59', '#ffd166'],
+          ['HOT', 'Daily Spin', 'Core spin module included in every clone.', '◉', '#7c3aed', '#22d3ee'],
+          ['NEW', 'Airdrop Quest', 'Task wall slot for WLD, Base, or partner campaigns.', '✦', '#0f766e', '#84cc16'],
+          ['NEW', 'Invite Race', 'Referral leaderboard and direct member tracking.', '⇄', '#2563eb', '#f97316'],
+          ['NEW', 'Reward Pool', 'Event reward pool slot. No APR or yield promise.', '◆', '#b45309', '#facc15'],
+          ['SOON', 'Wallet Pass', 'Smart wallet and NFT membership pass placeholder.', '◇', '#334155', '#60a5fa'],
+          ['SOON', 'API Game Slot', 'Plug in third-party game API here.', '▣', '#be123c', '#fb7185'],
+          ['SOON', 'Mini App Slot', 'World App, Telegram, LINE, or web campaign slot.', '●', '#166534', '#4ade80'],
+          ['SOON', 'Lending Interest', 'Collect future borrowing intent only.', '$', '#4c1d95', '#c084fc']
+        ],
+        zh: [
+          ['熱門', '幸運寶箱', '用票券開寶箱。獎勵邏輯先預留。', '▰', '#ff7a59', '#ffd166'],
+          ['熱門', '每日轉盤', '每個克隆版都內建的核心轉盤模組。', '◉', '#7c3aed', '#22d3ee'],
+          ['新', '空投任務', '預留 WLD、Base 或合作活動任務牆。', '✦', '#0f766e', '#84cc16'],
+          ['新', '邀請排行', '推薦排行榜與直系會員追蹤。', '⇄', '#2563eb', '#f97316'],
+          ['新', '活動獎池', '活動獎池入口，不承諾 APR 或收益。', '◆', '#b45309', '#facc15'],
+          ['預留', '錢包通行證', '智慧錢包與 NFT 會員通行證預留。', '◇', '#334155', '#60a5fa'],
+          ['預留', 'API 遊戲槽', '之後可插入第三方遊戲 API。', '▣', '#be123c', '#fb7185'],
+          ['預留', 'Mini App 槽', 'World App、Telegram、LINE 或 Web 活動入口。', '●', '#166534', '#4ade80'],
+          ['預留', '借貸意向', '只收集未來借貸意向，不做立即借貸。', '$', '#4c1d95', '#c084fc']
+        ]
+      };
+
+      const stateKey = 'rewardArcadeShell';
+      let lang = localStorage.getItem('arcadeLang') || 'en';
+      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0}');
+
+      function save() {
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        renderState();
+      }
+
+      function t(key) {
+        return i18n[lang][key] || i18n.en[key] || key;
+      }
+
+      function translate() {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          el.innerHTML = t(el.dataset.i18n);
+        });
+        document.querySelector('#langToggle').textContent = lang === 'en' ? '中文' : 'EN';
+        renderGames();
+      }
+
+      function renderState() {
+        document.querySelector('#memberId').textContent = state.memberId;
+        document.querySelector('#points').textContent = state.points;
+        document.querySelector('#tickets').value = state.tickets;
+        document.querySelector('#email').value = state.email || '';
+        document.querySelector('#inviteCode').value = state.inviteCode || '';
+        const referralLine = document.querySelector('#referralLine');
+        if (state.referralCode) {
+          referralLine.hidden = false;
+          referralLine.textContent = `${lang === 'zh' ? '你的專屬推薦碼' : 'Your referral code'}: ${state.referralCode}`;
+        } else {
+          referralLine.hidden = true;
+        }
+      }
+
+      function show(data) {
+        document.querySelector('#output').textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      }
+
+      async function postJson(url, body) {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      }
+
+      function currentApp() {
+        return new URLSearchParams(location.search).get('app') || 'default';
+      }
+
+      async function logEvent(eventType, card, metadata = {}) {
+        try {
+          return await postJson('/api/gateway/event', {
+            memberId: state.memberId,
+            sourceApp: currentApp(),
+            eventType,
+            card,
+            metadata
+          });
+        } catch (error) {
+          return { warning: error.message };
+        }
+      }
+
+      async function logReward(reason, pointsDelta, ticketsDelta, metadata = {}) {
+        try {
+          return await postJson('/api/gateway/reward', {
+            memberId: state.memberId,
+            sourceApp: currentApp(),
+            reason,
+            pointsDelta,
+            ticketsDelta,
+            metadata
+          });
+        } catch (error) {
+          return { warning: error.message };
+        }
+      }
+
+      function openDrawer(id) {
+        document.querySelectorAll('.drawer').forEach((el) => el.classList.remove('active'));
+        document.querySelector(`#${id}`).classList.add('active');
+        document.querySelector('#outputDrawer').classList.add('active');
+      }
+
+      function renderGames() {
+        const grid = document.querySelector('#gameGrid');
+        grid.innerHTML = '';
+        gameCopy[lang].forEach((game, index) => {
+          const [badge, title, desc, icon, a, b] = game;
+          const card = document.createElement('article');
+          card.className = 'game-card';
+          card.style.setProperty('--art-a', a);
+          card.style.setProperty('--art-b', b);
+          card.innerHTML = `
+            <span class="badge ${badge === 'NEW' || badge === '新' ? 'new' : ''}">${badge}</span>
+            <div class="game-art">${icon}</div>
+            <div class="game-body">
+              <h3 class="game-title">${title}</h3>
+              <p class="game-desc">${desc}</p>
+              <button class="${index < 3 ? '' : 'ghost'}">${index < 3 ? (lang === 'zh' ? '進入' : 'Enter') : (lang === 'zh' ? '預留' : 'Reserved')}</button>
+            </div>
+          `;
+          card.querySelector('button').addEventListener('click', async () => {
+            if (index === 0) {
+              state.points += 8;
+              state.tickets += 1;
+              save();
+              const backend = await logReward('lucky_box', 8, 1, { slot: title });
+              show({
+                slot: title,
+                status: 'prototype action complete',
+                memberId: state.memberId,
+                points: state.points,
+                tickets: state.tickets,
+                backend
+              });
+              return;
+            }
+            if (index === 1) {
+              openDrawer('spinDrawer');
+              const backend = await logEvent('open_spin', title, {});
+              show({ module: title, status: 'Daily Spin ready', backend });
+              return;
+            }
+            if (index === 2) {
+              openQuickPanel(title, desc);
+              return;
+            }
+            const backend = await logEvent(index < 3 ? 'card_action' : 'reserved_card_click', title, { index });
+            show({
+              slot: title,
+              status: index < 3 ? 'prototype action complete' : 'reserved slot',
+              memberId: state.memberId,
+              points: state.points,
+              tickets: state.tickets,
+              backend
+            });
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      function openQuickPanel(title, text) {
+        document.querySelector('#quickTitle').textContent = title;
+        document.querySelector('#quickText').textContent = text;
+        const isService = title.includes('Service') || title.includes('客服');
+        document.querySelector('#quickContact').hidden = !isService;
+        openDrawer('quickDrawer');
+        show({ panel: title, note: 'This slot is ready for API/payment/game integration.' });
+      }
+
+      document.querySelector('#langToggle').addEventListener('click', () => {
+        lang = lang === 'en' ? 'zh' : 'en';
+        localStorage.setItem('arcadeLang', lang);
+        translate();
+      });
+
+      document.querySelector('#themeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('light');
+        document.querySelector('#themeToggle').textContent = document.body.classList.contains('light') ? 'Light' : 'Gold';
+      });
+
+      document.querySelector('#loginOpen').addEventListener('click', () => openDrawer('loginDrawer'));
+      document.querySelector('#redeemOpen').addEventListener('click', () => openDrawer('redeemDrawer'));
+      document.querySelector('#closeBtn').addEventListener('click', () => show('Mini app close placeholder.'));
+
+      document.querySelector('#saveMember').addEventListener('click', async () => {
+        state.email = document.querySelector('#email').value.trim();
+        state.inviteCode = document.querySelector('#inviteCode').value.trim();
+        state.memberId = state.email ? `M-${Math.abs(hashCode(state.email)).toString().slice(0, 6)}` : state.memberId;
+        state.referralCode = state.email ? `REF-${Math.abs(hashCode(`${state.email}:ref`)).toString().slice(0, 6)}` : state.referralCode;
+        state.points += state.email ? 20 : 0;
+        save();
+        let backend = null;
+        try {
+          backend = await postJson('/api/gateway/member', {
+            memberId: state.memberId,
+            email: state.email,
+            inviteCode: state.inviteCode,
+            referralCode: state.referralCode,
+            sourceApp: currentApp(),
+            points: state.points,
+            tickets: state.tickets,
+            metadata: { userAgent: navigator.userAgent }
+          });
+        } catch (error) {
+          backend = { warning: error.message };
+        }
+        show({
+          action: 'pass claimed',
+          memberId: state.memberId,
+          referralCode: state.referralCode,
+          email: state.email,
+          inviteCode: state.inviteCode,
+          points: state.points,
+          backend
+        });
+      });
+
+      document.querySelector('#spinNow').addEventListener('click', async () => {
+        const rewards = [
+          { label: '+5 points', points: 5, tickets: 0 },
+          { label: '+10 points', points: 10, tickets: 0 },
+          { label: '+20 points', points: 20, tickets: 0 },
+          { label: '+1 ticket', points: 0, tickets: 1 },
+          { label: '+2 tickets', points: 0, tickets: 2 },
+          { label: '+30 points', points: 30, tickets: 0 }
+        ];
+        const index = Math.floor(Math.random() * rewards.length);
+        const reward = rewards[index];
+        state.points += reward.points;
+        state.tickets += reward.tickets;
+        state.spinRotation = (state.spinRotation || 0) + 1440 + index * 60 + Math.floor(Math.random() * 35);
+        document.querySelector('#wheel').style.transform = `rotate(${state.spinRotation}deg)`;
+        document.querySelector('#spinReward').textContent = reward.label;
+        document.querySelector('#spinText').textContent = lang === 'zh'
+          ? '獎勵已加入你的本機點數/票券。'
+          : 'Reward added to your local points/tickets.';
+        save();
+        const backend = await logReward('daily_spin', reward.points, reward.tickets, reward);
+        show({ action: 'daily spin', reward, points: state.points, tickets: state.tickets, memberId: state.memberId, backend });
+      });
+
+      document.querySelector('#spinRules').addEventListener('click', () => {
+        show(lang === 'zh'
+          ? '每日轉盤是母版核心模組。獎勵可依 WLD / Base / Game / AI 版本替換。點數僅用於平台內活動與兌換。'
+          : 'Daily Spin is a core template module. Rewards can be replaced per WLD / Base / Game / AI version. Points are for in-platform activities and redemption only.');
+      });
+
+      document.querySelector('#mockMiniApp').addEventListener('click', async () => {
+        state.memberId = `APP-${Math.floor(10000 + Math.random() * 89999)}`;
+        state.points += 10;
+        save();
+        const backend = await logEvent('mini_app_entry', 'mini_app', {});
+        show({ action: 'mini app entry simulated', memberId: state.memberId, points: state.points, backend });
+      });
+
+      document.querySelectorAll('[data-drawer]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.drawer;
+          const title = button.textContent.trim();
+          const messages = {
+            service: 'Customer support and cooperation slot. Contact TG @richmrking or email lovekry19950411@gmail.com.',
+            record: 'Record slot. Add transaction, points, redemption, and play history.',
+            daily: 'Daily slot. Add streak, check-in, and free reward flow.',
+            store: 'Store slot. Add credits, tickets, coupons, or NFT pass sales.',
+            spin: 'Daily Spin is already included as a clone-ready module. Rewards can be changed per version.'
+          };
+          if (key === 'spin') {
+            openDrawer('spinDrawer');
+            show({ module: title, status: 'Daily Spin ready' });
+          } else {
+            openQuickPanel(title, messages[key]);
+          }
+        });
+      });
+
+      function hashCode(text) {
+        return text.split('').reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
+      }
+
+      renderState();
+      translate();
+      show('Ready. Login, switch language/theme, or tap a game slot.');
+    </script>
+  </body>
+</html>
