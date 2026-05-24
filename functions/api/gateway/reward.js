@@ -3,34 +3,39 @@ import { json, readBody, supabase } from '../_supabase.js';
 export async function onRequestPost({ request, env }) {
   try {
     const body = await readBody(request);
-    const memberId = body.memberId || '';
+    const memberKey = body.memberId || '';
     const sourceApp = body.sourceApp || 'default';
     const pointsDelta = Number(body.pointsDelta || 0);
     const ticketsDelta = Number(body.ticketsDelta || 0);
+    let member = null;
+    if (memberKey) {
+      const members = await supabase(env, `gateway_members?display_name=eq.${encodeURIComponent(memberKey)}&select=id,points,tickets&limit=1`, {
+        method: 'GET'
+      });
+      member = members[0] || null;
+    }
 
     const ledger = await supabase(env, 'gateway_ledger', {
       method: 'POST',
       body: JSON.stringify({
-        member_id: memberId,
-        source_app: sourceApp,
+        member_id: member?.id || null,
+        action: body.reason || 'reward',
         points_delta: pointsDelta,
         tickets_delta: ticketsDelta,
-        reason: body.reason || 'reward',
-        metadata: body.metadata || {}
+        note: JSON.stringify({
+          memberId: memberKey,
+          sourceApp,
+          metadata: body.metadata || {}
+        })
       })
     });
 
-    if (memberId) {
-      const existing = await supabase(env, `gateway_members?member_id=eq.${encodeURIComponent(memberId)}&select=points,tickets`, {
-        method: 'GET'
-      });
-      const current = existing[0] || { points: 0, tickets: 0 };
-      await supabase(env, `gateway_members?member_id=eq.${encodeURIComponent(memberId)}`, {
+    if (member) {
+      await supabase(env, `gateway_members?id=eq.${encodeURIComponent(member.id)}`, {
         method: 'PATCH',
         body: JSON.stringify({
-          points: Number(current.points || 0) + pointsDelta,
-          tickets: Number(current.tickets || 0) + ticketsDelta,
-          updated_at: new Date().toISOString()
+          points: Number(member.points || 0) + pointsDelta,
+          tickets: Number(member.tickets || 0) + ticketsDelta
         })
       });
     }

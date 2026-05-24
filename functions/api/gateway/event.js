@@ -3,14 +3,26 @@ import { json, readBody, supabase } from '../_supabase.js';
 export async function onRequestPost({ request, env }) {
   try {
     const body = await readBody(request);
+    const memberKey = body.memberId || '';
+    let memberUuid = null;
+    if (memberKey) {
+      const members = await supabase(env, `gateway_members?display_name=eq.${encodeURIComponent(memberKey)}&select=id&limit=1`, {
+        method: 'GET'
+      });
+      memberUuid = members[0]?.id || null;
+    }
+
     const rows = await supabase(env, 'gateway_events', {
       method: 'POST',
       body: JSON.stringify({
-        member_id: body.memberId || '',
-        source_app: body.sourceApp || 'default',
+        member_id: memberUuid,
+        source: body.sourceApp || 'default',
         event_type: body.eventType || 'event',
-        card: body.card || '',
-        metadata: body.metadata || {}
+        payload: {
+          memberId: memberKey,
+          card: body.card || '',
+          metadata: body.metadata || {}
+        }
       })
     });
 

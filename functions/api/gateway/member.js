@@ -10,30 +10,28 @@ export async function onRequestPost({ request, env }) {
     const referralCode = body.referralCode || referralCodeFromEmail(email);
     const sourceApp = body.sourceApp || 'default';
 
-    const rows = await supabase(env, 'gateway_members?on_conflict=member_id', {
+    const rows = await supabase(env, 'gateway_members?on_conflict=referral_code', {
       method: 'POST',
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
       body: JSON.stringify({
-        member_id: memberId,
         email,
-        invite_code: body.inviteCode || '',
         referral_code: referralCode,
-        source_app: sourceApp,
+        referred_by: body.inviteCode || '',
+        display_name: memberId,
+        chain: sourceApp,
         points: Number(body.points || 0),
         tickets: Number(body.tickets || 0),
-        metadata: body.metadata || {},
-        updated_at: new Date().toISOString()
+        status: 'guest'
       })
     });
 
     await supabase(env, 'gateway_events', {
       method: 'POST',
       body: JSON.stringify({
-        member_id: memberId,
-        source_app: sourceApp,
+        member_id: rows[0]?.id || null,
+        source: sourceApp,
         event_type: 'member_claimed',
-        card: 'claim_pass',
-        metadata: { email, inviteCode: body.inviteCode || '', referralCode }
+        payload: { card: 'claim_pass', email, inviteCode: body.inviteCode || '', referralCode, memberId }
       })
     });
 

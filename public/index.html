@@ -765,7 +765,7 @@
         en: [
           ['HOT', 'Lucky Box', 'Open boxes with tickets. Placeholder for reward logic.', '▰', '#ff7a59', '#ffd166'],
           ['HOT', 'Daily Spin', 'Core spin module included in every clone.', '◉', '#7c3aed', '#22d3ee'],
-          ['NEW', 'Airdrop Quest', 'Task wall slot for WLD, Base, or partner campaigns.', '✦', '#0f766e', '#84cc16'],
+          ['NEW', 'Follow X Quest', 'Follow @G9Yeu21 to unlock +1 spin credit. This task slot is reusable for every clone.', '✦', '#0f766e', '#84cc16'],
           ['NEW', 'Invite Race', 'Referral leaderboard and direct member tracking.', '⇄', '#2563eb', '#f97316'],
           ['NEW', 'Reward Pool', 'Event reward pool slot. No APR or yield promise.', '◆', '#b45309', '#facc15'],
           ['SOON', 'Wallet Pass', 'Smart wallet and NFT membership pass placeholder.', '◇', '#334155', '#60a5fa'],
@@ -788,7 +788,7 @@
 
       const stateKey = 'rewardArcadeShell';
       let lang = localStorage.getItem('arcadeLang') || 'en';
-      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0}');
+      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0,"spinCredits":0,"welcomeSpinGranted":false,"followXClaimed":false}');
 
       function save() {
         localStorage.setItem(stateKey, JSON.stringify(state));
@@ -918,7 +918,17 @@
               return;
             }
             if (index === 2) {
-              openQuickPanel(title, desc);
+              window.open('https://x.com/G9Yeu21', '_blank', 'noopener,noreferrer');
+              if (!state.followXClaimed) {
+                state.spinCredits = Number(state.spinCredits || 0) + 1;
+                state.followXClaimed = true;
+                save();
+                const backend = await logReward('follow_x_quest', 0, 0, { task: title, url: 'https://x.com/G9Yeu21', spinCreditsGranted: 1 });
+                show({ action: 'follow x quest claimed', task: title, reward: '+1 spin credit', spinCredits: state.spinCredits, memberId: state.memberId, backend });
+              } else {
+                const backend = await logEvent('follow_x_quest_opened', title, { url: 'https://x.com/G9Yeu21', alreadyClaimed: true });
+                show({ action: 'follow x quest opened', status: 'already claimed', spinCredits: state.spinCredits, memberId: state.memberId, backend });
+              }
               return;
             }
             const backend = await logEvent(index < 3 ? 'card_action' : 'reserved_card_click', title, { index });
@@ -965,6 +975,10 @@
         state.memberId = state.email ? `M-${Math.abs(hashCode(state.email)).toString().slice(0, 6)}` : state.memberId;
         state.referralCode = state.email ? `REF-${Math.abs(hashCode(`${state.email}:ref`)).toString().slice(0, 6)}` : state.referralCode;
         state.points += state.email ? 20 : 0;
+        if (state.email && !state.welcomeSpinGranted) {
+          state.spinCredits = Number(state.spinCredits || 0) + 1;
+          state.welcomeSpinGranted = true;
+        }
         save();
         let backend = null;
         try {
@@ -988,11 +1002,21 @@
           email: state.email,
           inviteCode: state.inviteCode,
           points: state.points,
+          spinCredits: state.spinCredits || 0,
           backend
         });
       });
 
       document.querySelector('#spinNow').addEventListener('click', async () => {
+        if (Number(state.spinCredits || 0) <= 0) {
+          const message = lang === 'zh'
+            ? '目前沒有轉盤次數。先 Claim Pass 留下信箱可取得 1 次；之後可由任務、驗證、活動或廣告增加。'
+            : 'No spin credits. Claim Pass with email to get 1 spin. More credits can later come from quests, verification, campaigns, or ads.';
+          document.querySelector('#spinReward').textContent = lang === 'zh' ? '需要轉盤次數' : 'Need Spin Credit';
+          document.querySelector('#spinText').textContent = message;
+          show({ action: 'spin blocked', reason: 'no spin credits', memberId: state.memberId, spinCredits: state.spinCredits || 0 });
+          return;
+        }
         const rewards = [
           { label: '+5 points', points: 5, tickets: 0 },
           { label: '+10 points', points: 10, tickets: 0 },
@@ -1005,6 +1029,7 @@
         const reward = rewards[index];
         state.points += reward.points;
         state.tickets += reward.tickets;
+        state.spinCredits = Number(state.spinCredits || 0) - 1;
         state.spinRotation = (state.spinRotation || 0) + 1440 + index * 60 + Math.floor(Math.random() * 35);
         document.querySelector('#wheel').style.transform = `rotate(${state.spinRotation}deg)`;
         document.querySelector('#spinReward').textContent = reward.label;
@@ -1013,13 +1038,13 @@
           : 'Reward added to your local points/tickets.';
         save();
         const backend = await logReward('daily_spin', reward.points, reward.tickets, reward);
-        show({ action: 'daily spin', reward, points: state.points, tickets: state.tickets, memberId: state.memberId, backend });
+        show({ action: 'daily spin', reward, points: state.points, tickets: state.tickets, spinCredits: state.spinCredits, memberId: state.memberId, backend });
       });
 
       document.querySelector('#spinRules').addEventListener('click', () => {
         show(lang === 'zh'
-          ? '每日轉盤是母版核心模組。獎勵可依 WLD / Base / Game / AI 版本替換。點數僅用於平台內活動與兌換。'
-          : 'Daily Spin is a core template module. Rewards can be replaced per WLD / Base / Game / AI version. Points are for in-platform activities and redemption only.');
+          ? '轉盤採用次數券制度。Claim Pass 後先送 1 次；之後可預留給每日任務、身份驗證、邀請好友、廣告觀看、合作活動增加。點數只用於平台活動與兌換。'
+          : 'Spin uses a credit system. Claim Pass grants 1 spin first. Future credits can come from daily quests, verification, referrals, ads, or partner campaigns. Points are for in-platform activities and redemption only.');
       });
 
       document.querySelector('#mockMiniApp').addEventListener('click', async () => {
@@ -1041,11 +1066,18 @@
             store: 'Store slot. Add credits, tickets, coupons, or NFT pass sales.',
             spin: 'Daily Spin is already included as a clone-ready module. Rewards can be changed per version.'
           };
+          const zhMessages = {
+            service: '合作與客服入口。可聯絡 TG @richmrking 或 email lovekry19950411@gmail.com。',
+            record: '紀錄中心預留位。之後可放點數、兌換、任務、遊玩紀錄。',
+            daily: '每日任務預留位。之後可放簽到、連續任務、免費獎勵。',
+            store: '商店預留位。之後可放點數、票券、優惠券或 NFT Pass。',
+            spin: '轉盤是母版核心模組。每個版本可替換獎勵內容。'
+          };
           if (key === 'spin') {
             openDrawer('spinDrawer');
             show({ module: title, status: 'Daily Spin ready' });
           } else {
-            openQuickPanel(title, messages[key]);
+            openQuickPanel(title, lang === 'zh' ? zhMessages[key] : messages[key]);
           }
         });
       });
