@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Human Quest WLD - 01</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07090d;
+        --panel: rgba(18, 21, 28, 0.94);
+        --panel2: rgba(255, 255, 255, 0.06);
+        --line: rgba(255, 255, 255, 0.12);
+        --ink: #fff8e8;
+        --muted: #b8ad99;
+        --gold: #ffd36d;
+        --orange: #ff9f1c;
+        --green: #39e58c;
+        --blue: #4aa3ff;
+        --pink: #ff2f92;
+        --danger: #ff5c7a;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.36);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 20% 0%, rgba(255, 211, 109, 0.18), transparent 28%),
+          radial-gradient(circle at 100% 12%, rgba(74, 163, 255, 0.14), transparent 28%),
+          linear-gradient(180deg, #111018 0%, var(--bg) 48%, #050608 100%);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button, input {
+        font: inherit;
+      }
+
+      button {
+        min-height: 42px;
+        border: 0;
+        border-radius: 13px;
+        color: #201304;
+        background: linear-gradient(135deg, var(--gold), var(--orange));
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 14px 26px rgba(255, 159, 28, 0.2);
+      }
+
+      button.secondary {
+        color: var(--ink);
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.07);
+        box-shadow: none;
+      }
+
+      button.danger {
+        color: #fff;
+        background: linear-gradient(135deg, #ff2f92, #ff5c7a);
+      }
+
+      input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--ink);
+        background: rgba(0, 0, 0, 0.22);
+      }
+
+      .shell {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        padding: 14px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 0 12px;
+        background: linear-gradient(180deg, rgba(7, 9, 13, 0.98), rgba(7, 9, 13, 0.78));
+        backdrop-filter: blur(12px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .logo {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        color: #201304;
+        background: linear-gradient(135deg, var(--gold), var(--orange));
+        font-weight: 1000;
+      }
+
+      h1, h2, h3, p { margin-top: 0; }
+      h1 {
+        margin-bottom: 2px;
+        font-size: clamp(22px, 4vw, 38px);
+        line-height: 1;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 6px 10px;
+        border: 1px solid rgba(255, 211, 109, 0.28);
+        border-radius: 999px;
+        color: var(--gold);
+        background: rgba(255, 211, 109, 0.08);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        gap: 14px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+        box-shadow: var(--shadow);
+      }
+
+      .panel-inner {
+        padding: 16px;
+      }
+
+      .hero {
+        min-height: 220px;
+        display: grid;
+        align-items: end;
+        padding: 18px;
+        border-radius: 22px;
+        background:
+          linear-gradient(135deg, rgba(255, 211, 109, 0.22), transparent 46%),
+          radial-gradient(circle at 80% 20%, rgba(74, 163, 255, 0.24), transparent 28%),
+          var(--panel);
+      }
+
+      .hero h2 {
+        max-width: 700px;
+        margin-bottom: 8px;
+        font-size: clamp(30px, 7vw, 72px);
+        line-height: 0.95;
+      }
+
+      .hero p {
+        max-width: 620px;
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.55;
+        font-weight: 700;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .stat {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(0,0,0,0.18);
+      }
+
+      .stat span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .stat strong {
+        display: block;
+        margin-top: 4px;
+        color: var(--gold);
+        font-size: 22px;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        margin: 14px 0;
+      }
+
+      .tab {
+        min-height: 50px;
+        padding: 8px;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.06);
+        box-shadow: none;
+      }
+
+      .tab.active {
+        color: #201304;
+        background: linear-gradient(135deg, var(--gold), var(--orange));
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .quest-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .quest {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(0,0,0,0.18);
+      }
+
+      .quest h3 {
+        margin-bottom: 4px;
+        font-size: 16px;
+      }
+
+      .quest p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .quest small {
+        display: inline-block;
+        margin-top: 8px;
+        color: var(--green);
+        font-weight: 900;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .spin-layout {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+      }
+
+      .wheel {
+        position: relative;
+        width: 230px;
+        aspect-ratio: 1;
+        border: 10px solid rgba(255, 211, 109, 0.9);
+        border-radius: 50%;
+        background: conic-gradient(
+          #ff5c7a 0deg 60deg,
+          #ffd36d 60deg 120deg,
+          #39e58c 120deg 180deg,
+          #4aa3ff 180deg 240deg,
+          #b56cff 240deg 300deg,
+          #ff9f1c 300deg 360deg
+        );
+        box-shadow: var(--shadow);
+        transition: transform 2200ms cubic-bezier(.12,.78,.12,1);
+      }
+
+      .wheel::before {
+        content: "";
+        position: absolute;
+        inset: 20%;
+        border-radius: 50%;
+        background: var(--panel);
+        border: 1px solid var(--line);
+      }
+
+      .wheel::after {
+        content: "WLD";
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        font-weight: 1000;
+      }
+
+      .stress-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .stress-stage {
+        min-height: 260px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 50% 18%, rgba(255, 211, 109, 0.28), transparent 24%),
+          linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.12));
+      }
+
+      .stress-target {
+        width: min(320px, 92%);
+        min-height: 150px;
+        display: grid;
+        place-items: center;
+        border: 3px solid rgba(255, 211, 109, 0.9);
+        border-radius: 28px;
+        color: #fff8e8;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.22), transparent 38%),
+          linear-gradient(135deg, #ef4444, #7c2d12);
+        box-shadow: 0 18px 0 rgba(0,0,0,0.22), var(--shadow);
+        font-size: 48px;
+        font-weight: 1000;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 100ms ease, filter 140ms ease;
+      }
+
+      .stress-target.hit {
+        transform: translateY(6px) scale(0.97) rotate(-1deg);
+        filter: brightness(1.2);
+      }
+
+      .hp-track {
+        overflow: hidden;
+        height: 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(0,0,0,0.26);
+      }
+
+      .hp-fill {
+        height: 100%;
+        width: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--green), var(--gold), var(--danger));
+        transition: width 160ms ease;
+      }
+
+      .notice {
+        padding: 12px;
+        border: 1px solid rgba(255, 211, 109, 0.24);
+        border-radius: 16px;
+        color: var(--gold);
+        background: rgba(255, 211, 109, 0.08);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      pre {
+        max-height: 260px;
+        overflow: auto;
+        margin: 0;
+        padding: 12px;
+        border-radius: 16px;
+        color: #d9ffe9;
+        background: #05080c;
+        white-space: pre-wrap;
+      }
+
+      .footer {
+        margin-top: 14px;
+        padding: 14px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 13px;
+      }
+
+      .footer a {
+        color: var(--gold);
+      }
+
+      @media (max-width: 820px) {
+        .grid,
+        .spin-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          padding: 10px;
+        }
+
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: 170px;
+          padding: 14px;
+        }
+
+        .hero h2 {
+          font-size: 34px;
+        }
+
+        .tabs {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 5px;
+        }
+
+        .tab {
+          min-height: 42px;
+          padding: 5px;
+          font-size: 11px;
+        }
+
+        .form-grid,
+        .quest {
+          grid-template-columns: 1fr;
+        }
+
+        .quest button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">WLD</div>
+          <div>
+            <h1>Human Quest WLD</h1>
+            <p class="sub">01 chain edition / World App ready shell</p>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:flex-end;margin:0">
+          <span class="pill">Mini App Ready</span>
+          <button class="secondary" id="shareTop">Share</button>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div>
+          <section class="hero panel">
+            <div>
+              <span class="pill">WLD Zone</span>
+              <h2>Play. Claim. Refer. Return.</h2>
+              <p>第一版先做 WLD 流量入口：留信箱、拿推薦碼、做任務、拿轉盤次數、記錄回你的資料中心。World ID / MiniKit 之後接在這裡。</p>
+            </div>
+          </section>
+
+          <section class="stats">
+            <div class="stat"><span>Member</span><strong id="memberId">Guest</strong></div>
+            <div class="stat"><span>HQ Points</span><strong id="points">0</strong></div>
+            <div class="stat"><span>Tickets</span><strong id="tickets">0</strong></div>
+            <div class="stat"><span>Spin Credits</span><strong id="spins">0</strong></div>
+          </section>
+
+          <nav class="tabs">
+            <button class="tab active" data-view="pass">Pass</button>
+            <button class="tab" data-view="quests">Quest</button>
+            <button class="tab" data-view="spin">Spin</button>
+            <button class="tab" data-view="smash">Game</button>
+            <button class="tab" data-view="wld">WLD</button>
+          </nav>
+
+          <section class="panel view active" id="view-pass">
+            <div class="panel-inner">
+              <h2>Claim WLD Pass</h2>
+              <p class="sub">不是註冊感，是領通行證。留下 email 後產生你的推薦碼，先送 1 次 Spin Credit。</p>
+              <div class="form-grid" style="margin-top:12px">
+                <div>
+                  <label>Email</label>
+                  <input id="email" type="email" placeholder="player@example.com">
+                </div>
+                <div>
+                  <label>Invite / Referral Code</label>
+                  <input id="inviteCode" placeholder="REF-000000">
+                </div>
+              </div>
+              <div class="actions">
+                <button id="claimPass">Claim Pass</button>
+                <button class="secondary" id="copyRef">Copy Referral Link</button>
+              </div>
+              <div class="notice" id="refLine" style="margin-top:12px">Claim your pass to create a referral code.</div>
+            </div>
+          </section>
+
+          <section class="panel view" id="view-quests">
+            <div class="panel-inner">
+              <h2>WLD Quest Board</h2>
+              <p class="sub">任務都是可換模板。這版先放你自己的 X、分享、World ID 預留、Waitlist。</p>
+              <div class="quest-list" style="margin-top:12px">
+                <article class="quest">
+                  <div>
+                    <h3>Follow X: @G9Yeu21</h3>
+                    <p>第一個可追蹤任務。點擊會開啟 X，第一次完成多送 1 次 Spin Credit。</p>
+                    <small>Reward: +1 Spin Credit</small>
+                  </div>
+                  <button data-quest="follow_x">Start</button>
+                </article>
+                <article class="quest">
+                  <div>
+                    <h3>Share Your WLD Pass</h3>
+                    <p>分享你的專屬推薦連結。支援手機原生分享，桌面會複製連結。</p>
+                    <small>Reward: +20 HQ Points</small>
+                  </div>
+                  <button data-quest="share_pass">Share</button>
+                </article>
+                <article class="quest">
+                  <div>
+                    <h3>World ID Ready</h3>
+                    <p>這裡之後接 MiniKit / World ID。現在先記錄玩家點擊驗證意願。</p>
+                    <small>Reward: +10 HQ Points</small>
+                  </div>
+                  <button data-quest="world_id_interest">Mark Ready</button>
+                </article>
+                <article class="quest">
+                  <div>
+                    <h3>Lending Waitlist</h3>
+                    <p>先不做借貸，只收集未來 WLD 抵押/借貸興趣。</p>
+                    <small>Reward: +5 HQ Points</small>
+                  </div>
+                  <button data-quest="lending_waitlist">Join</button>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel view" id="view-spin">
+            <div class="panel-inner">
+              <h2>Lucky Spin</h2>
+              <p class="sub">所有任務先回到 Spin Credit，避免一開始就碰複雜金流或賭博邏輯。</p>
+              <div class="spin-layout" style="margin-top:14px">
+                <div class="wheel" id="wheel"></div>
+                <div>
+                  <h3 id="spinTitle">Ready</h3>
+                  <p class="sub" id="spinText">Use 1 Spin Credit to win points or tickets.</p>
+                  <div class="actions">
+                    <button id="spinNow">Spin Now</button>
+                    <button class="secondary" id="spinRules">Rules</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel view" id="view-smash">
+            <div class="panel-inner">
+              <h2>Stress Smash Lite</h2>
+              <p class="sub">先保留小遊戲作為 WLD Mini App 遊戲位。之後可換成更完整版本。</p>
+              <div class="stress-card" style="margin-top:12px">
+                <div class="stress-stage">
+                  <button id="stressTarget" class="stress-target" type="button">WLD</button>
+                </div>
+                <div class="hp-track"><div class="hp-fill" id="hpFill"></div></div>
+                <p class="sub">HP: <span id="hpText">100</span>/100 · Hits: <span id="hitText">0</span></p>
+                <div class="actions">
+                  <button id="hitTarget">Smash</button>
+                  <button class="secondary" id="resetTarget">Reset</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel view" id="view-wld">
+            <div class="panel-inner">
+              <h2>WLD Integration Slots</h2>
+              <div class="quest-list">
+                <article class="quest">
+                  <div>
+                    <h3>World App Store</h3>
+                    <p>這版先是 World App-ready shell。正式上架時接 MiniKit、World ID、支付或通知。</p>
+                    <small>Status: Placeholder</small>
+                  </div>
+                  <button class="secondary" data-event="world_app_slot">Record</button>
+                </article>
+                <article class="quest">
+                  <div>
+                    <h3>World ID</h3>
+                    <p>真人驗證不放入口，而是身份升級節點：Guest -> Active -> Verified。</p>
+                    <small>Status: Later</small>
+                  </div>
+                  <button class="secondary" data-event="world_id_slot">Record</button>
+                </article>
+                <article class="quest">
+                  <div>
+                    <h3>WLD Campaign</h3>
+                    <p>空投、任務、廣告位、合作活動都能回傳到你的資料中心。</p>
+                    <small>Status: Ready slot</small>
+                  </div>
+                  <button class="secondary" data-event="wld_campaign_slot">Record</button>
+                </article>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-inner">
+            <h2>Profile / Data</h2>
+            <p class="sub">這裡是你真正要留下來的東西：email、推薦碼、任務、分享、分數。</p>
+            <div class="notice" style="margin:12px 0">
+              Referral Code: <strong id="refCode">None</strong><br>
+              Source: <strong>WLD-01</strong>
+            </div>
+            <div class="actions">
+              <button id="shareSide">Share Pass</button>
+              <button class="secondary" id="audit">Show Local Data</button>
+            </div>
+            <h3 style="margin-top:16px">API / Status</h3>
+            <pre id="output">Ready.</pre>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="footer">
+        Partner / API / Ad Slot: <a href="https://t.me/richmrking" target="_blank" rel="noreferrer">TG @richmrking</a>
+        · <a href="mailto:lovekry19950411@gmail.com">lovekry19950411@gmail.com</a>
+      </footer>
+    </main>
+
+    <script>
+      const stateKey = 'humanQuestWld01';
+      const rewards = [
+        { label: '+10 Points', points: 10, tickets: 0 },
+        { label: '+25 Points', points: 25, tickets: 0 },
+        { label: '+1 Ticket', points: 0, tickets: 1 },
+        { label: '+2 Tickets', points: 0, tickets: 2 },
+        { label: '+50 Points', points: 50, tickets: 0 },
+        { label: 'Try Again +5', points: 5, tickets: 0 }
+      ];
+
+      let state = JSON.parse(localStorage.getItem(stateKey) || JSON.stringify({
+        email: '',
+        inviteCode: new URLSearchParams(location.search).get('ref') || '',
+        memberId: 'Guest-WLD',
+        referralCode: '',
+        points: 0,
+        tickets: 0,
+        spinCredits: 0,
+        passClaimed: false,
+        completed: {},
+        wheelRotation: 0,
+        hp: 100,
+        hits: 0,
+        smashRewarded: false
+      }));
+
+      function save() {
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        render();
+      }
+
+      function hashCode(text) {
+        return String(text).split('').reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
+      }
+
+      function show(data) {
+        document.querySelector('#output').textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      }
+
+      function render() {
+        document.querySelector('#memberId').textContent = state.memberId;
+        document.querySelector('#points').textContent = state.points;
+        document.querySelector('#tickets').textContent = state.tickets;
+        document.querySelector('#spins').textContent = state.spinCredits;
+        document.querySelector('#refCode').textContent = state.referralCode || 'None';
+        document.querySelector('#email').value = state.email || '';
+        document.querySelector('#inviteCode').value = state.inviteCode || '';
+        document.querySelector('#refLine').innerHTML = state.referralCode
+          ? `Your referral link: <strong>${shareUrl()}</strong>`
+          : 'Claim your pass to create a referral code.';
+        document.querySelector('#hpText').textContent = state.hp;
+        document.querySelector('#hitText').textContent = state.hits;
+        document.querySelector('#hpFill').style.width = `${state.hp}%`;
+      }
+
+      async function postJson(url, body) {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      }
+
+      async function logEvent(eventType, card, metadata = {}) {
+        try {
+          return await postJson('/api/gateway/event', {
+            memberId: state.memberId,
+            sourceApp: 'wld-01',
+            eventType,
+            card,
+            metadata
+          });
+        } catch (error) {
+          return { warning: error.message };
+        }
+      }
+
+      async function logReward(reason, pointsDelta, ticketsDelta, metadata = {}) {
+        try {
+          return await postJson('/api/gateway/reward', {
+            memberId: state.memberId,
+            sourceApp: 'wld-01',
+            reason,
+            pointsDelta,
+            ticketsDelta,
+            metadata
+          });
+        } catch (error) {
+          return { warning: error.message };
+        }
+      }
+
+      function shareUrl() {
+        const ref = encodeURIComponent(state.referralCode || state.memberId);
+        return `${location.origin}${location.pathname}?ref=${ref}`;
+      }
+
+      async function sharePass() {
+        const url = shareUrl();
+        const payload = {
+          title: 'Human Quest WLD',
+          text: `Join my WLD quest pass: ${state.referralCode || state.memberId}`,
+          url
+        };
+        if (navigator.share) {
+          await navigator.share(payload).catch(() => null);
+        } else {
+          await navigator.clipboard?.writeText(url).catch(() => null);
+        }
+        const backend = await logEvent('share_pass', 'share', { url });
+        show({ action: 'share pass', url, backend });
+      }
+
+      document.querySelectorAll('.tab').forEach((button) => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach((el) => el.classList.remove('active'));
+          document.querySelectorAll('.view').forEach((el) => el.classList.remove('active'));
+          button.classList.add('active');
+          document.querySelector(`#view-${button.dataset.view}`).classList.add('active');
+        });
+      });
+
+      document.querySelector('#claimPass').addEventListener('click', async () => {
+        const email = document.querySelector('#email').value.trim().toLowerCase();
+        if (!email) {
+          show('Email is required to claim WLD Pass.');
+          return;
+        }
+        const wasClaimed = state.passClaimed;
+        state.email = email;
+        state.inviteCode = document.querySelector('#inviteCode').value.trim();
+        state.memberId = `WLD-${Math.abs(hashCode(email)).toString().slice(0, 7)}`;
+        state.referralCode = `WLD-${Math.abs(hashCode(`${email}:wld-ref`)).toString().slice(0, 7)}`;
+        state.passClaimed = true;
+        if (!wasClaimed) {
+          state.points += 20;
+          state.spinCredits += 1;
+        }
+        save();
+        let backend = null;
+        try {
+          backend = await postJson('/api/gateway/member', {
+            memberId: state.memberId,
+            email: state.email,
+            inviteCode: state.inviteCode,
+            referralCode: state.referralCode,
+            sourceApp: 'wld-01',
+            points: state.points,
+            tickets: state.tickets,
+            metadata: { ref: state.inviteCode, page: '01-wld' }
+          });
+        } catch (error) {
+          backend = { warning: error.message };
+        }
+        show({ action: 'claim WLD pass', memberId: state.memberId, referralCode: state.referralCode, spinCredits: state.spinCredits, backend });
+      });
+
+      async function completeQuest(key) {
+        if (key === 'follow_x') {
+          window.open('https://x.com/G9Yeu21', '_blank', 'noopener,noreferrer');
+        }
+
+        if (!state.completed[key]) {
+          state.completed[key] = true;
+          if (key === 'follow_x') state.spinCredits += 1;
+          if (key === 'share_pass') state.points += 20;
+          if (key === 'world_id_interest') state.points += 10;
+          if (key === 'lending_waitlist') state.points += 5;
+          save();
+          if (key === 'share_pass') await sharePass();
+          const backend = await logReward(`quest_${key}`, key === 'share_pass' ? 20 : key === 'world_id_interest' ? 10 : key === 'lending_waitlist' ? 5 : 0, 0, {
+            quest: key,
+            spinCreditsGranted: key === 'follow_x' ? 1 : 0
+          });
+          show({ action: 'quest completed', quest: key, points: state.points, spinCredits: state.spinCredits, backend });
+          return;
+        }
+
+        const backend = await logEvent('quest_opened_again', key, { alreadyCompleted: true });
+        show({ action: 'quest already completed', quest: key, backend });
+      }
+
+      document.querySelectorAll('[data-quest]').forEach((button) => {
+        button.addEventListener('click', () => completeQuest(button.dataset.quest));
+      });
+
+      document.querySelectorAll('[data-event]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const backend = await logEvent(button.dataset.event, 'wld_slot', {});
+          show({ action: 'slot recorded', event: button.dataset.event, backend });
+        });
+      });
+
+      document.querySelector('#spinNow').addEventListener('click', async () => {
+        if (state.spinCredits <= 0) {
+          show('No Spin Credits. Claim Pass or complete quests first.');
+          return;
+        }
+        const index = Math.floor(Math.random() * rewards.length);
+        const reward = rewards[index];
+        state.spinCredits -= 1;
+        state.points += reward.points;
+        state.tickets += reward.tickets;
+        state.wheelRotation += 1440 + index * 60 + Math.floor(Math.random() * 35);
+        document.querySelector('#wheel').style.transform = `rotate(${state.wheelRotation}deg)`;
+        document.querySelector('#spinTitle').textContent = reward.label;
+        document.querySelector('#spinText').textContent = 'Reward added to your WLD pass.';
+        save();
+        const backend = await logReward('wld_spin', reward.points, reward.tickets, reward);
+        show({ action: 'WLD spin', reward, points: state.points, tickets: state.tickets, spinCredits: state.spinCredits, backend });
+      });
+
+      document.querySelector('#spinRules').addEventListener('click', () => {
+        show('Spin Credit is the first reward container. Quests, referral, ads, World ID, or partner campaigns can add more credits later.');
+      });
+
+      async function hitTarget() {
+        if (state.hp <= 0) {
+          show('Target already broken. Reset for another round.');
+          return;
+        }
+        const damage = 8 + Math.floor(Math.random() * 16);
+        state.hp = Math.max(0, state.hp - damage);
+        state.hits += 1;
+        state.points += 1;
+        const target = document.querySelector('#stressTarget');
+        target.classList.add('hit');
+        setTimeout(() => target.classList.remove('hit'), 130);
+        let backend = null;
+        if (state.hp <= 0 && !state.smashRewarded) {
+          state.smashRewarded = true;
+          state.spinCredits += 1;
+          backend = await logReward('wld_stress_smash_clear', state.hits, 0, { spinCreditsGranted: 1, hits: state.hits });
+        }
+        save();
+        show({ action: 'stress smash', damage, hp: state.hp, hits: state.hits, points: state.points, spinCredits: state.spinCredits, backend });
+      }
+
+      document.querySelector('#stressTarget').addEventListener('click', hitTarget);
+      document.querySelector('#hitTarget').addEventListener('click', hitTarget);
+      document.querySelector('#resetTarget').addEventListener('click', async () => {
+        state.hp = 100;
+        state.hits = 0;
+        state.smashRewarded = false;
+        save();
+        const backend = await logEvent('wld_stress_smash_reset', 'game', {});
+        show({ action: 'stress smash reset', backend });
+      });
+
+      document.querySelector('#copyRef').addEventListener('click', sharePass);
+      document.querySelector('#shareTop').addEventListener('click', sharePass);
+      document.querySelector('#shareSide').addEventListener('click', sharePass);
+      document.querySelector('#audit').addEventListener('click', () => show(state));
+
+      render();
+      show('WLD-01 ready. Claim Pass first, then complete quests.');
+    </script>
+  </body>
+</html>

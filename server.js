@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname, join, normalize, sep } from 'node:path';
 import gatewayAudit from './api/gateway/audit.js';
 import gatewayEvent from './api/gateway/event.js';
 import gatewayMember from './api/gateway/member.js';
@@ -287,7 +287,18 @@ async function handleApi(req, res, path) {
 }
 
 async function serveStatic(res, path) {
-  const filePath = path === '/' ? join(process.cwd(), 'public', 'index.html') : join(process.cwd(), 'public', path);
+  const publicRoot = join(process.cwd(), 'public');
+  const cleanPath = decodeURIComponent(path).replace(/^\/public\/?/, '/').replace(/^\/+/, '');
+  const relativePath = path === '/' || cleanPath === '' ? 'index.html' : cleanPath;
+  let filePath = normalize(join(publicRoot, relativePath));
+  if (!filePath.startsWith(publicRoot + sep) && filePath !== publicRoot) {
+    const error = new Error('Invalid static path');
+    error.status = 400;
+    throw error;
+  }
+  if (existsSync(filePath) && !extname(filePath)) {
+    filePath = join(filePath, 'index.html');
+  }
   const content = await readFile(filePath);
   const contentType = MIME_TYPES[extname(filePath)] || 'application/octet-stream';
   res.writeHead(200, securityHeaders({ 'Content-Type': contentType }));

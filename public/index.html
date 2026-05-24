@@ -976,7 +976,7 @@
 
       const gameCopy = {
         en: [
-          ['HOT', 'WLD Stress Smash', 'A simple tap-to-smash mini game slot for WLD / World App clones.', 'SMASH', '#ff7a59', '#ffd166'],
+          ['HOT', '01 WLD Edition', 'First chain product: WLD pass, quests, referral, spin, and mini game shell.', 'WLD', '#ff7a59', '#ffd166'],
           ['HOT', 'Daily Spin', 'Core spin module included in every clone.', '◉', '#7c3aed', '#22d3ee'],
           ['NEW', 'Follow X Quest', 'Follow @G9Yeu21 to unlock +1 spin credit. This task slot is reusable for every clone.', '✦', '#0f766e', '#84cc16'],
           ['NEW', 'Invite Race', 'Referral leaderboard and direct member tracking.', '⇄', '#2563eb', '#f97316'],
@@ -1143,21 +1143,13 @@
           `;
           card.querySelector('button').addEventListener('click', async () => {
             if (index === 0) {
-              openDrawer('smashDrawer');
-              renderSmash();
-              const backend = await logEvent('stress_smash_opened', title, {
+              const backend = await logEvent('open_wld_01', title, {
                 chain: 'WLD',
-                slot: 'first_playable_game',
-                miniAppReady: true
+                target: '/public/01-wld/',
+                product: '01-wld'
               });
-              show({
-                slot: title,
-                status: 'Stress Smash is ready. Tap the target, earn points, and share your pass.',
-                memberId: state.memberId,
-                points: state.points,
-                tickets: state.tickets,
-                backend
-              });
+              show({ slot: title, status: 'Opening WLD-01 edition', backend });
+              location.href = '/public/01-wld/';
               return;
             }
             if (index === 1) {
