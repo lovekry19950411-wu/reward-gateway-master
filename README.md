@@ -1,6 +1,6 @@
-# Reward Gateway Master
+# Human Quest Master
 
-Reusable Reward Gateway master template.
+Reusable Human Quest master template.
 
 This is not a WLD-only app and not a Base-only app. It is a general private traffic gateway for collecting members, referral codes, points, tickets, and campaign/game/API slot activity.
 
@@ -10,7 +10,7 @@ This is not a WLD-only app and not a Base-only app. It is a general private traf
 - Member ID
 - Referral code
 - Invite code
-- Redeemable points
+- HQ points
 - Tickets
 - Daily Spin
 - Redeem Center placeholder

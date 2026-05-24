@@ -1,4 +1,4 @@
-# Reward Gateway Master Template
+# Human Quest Master Template
 
 這個資料夾是目前母版底板的說明，不是另一份克隆版程式。
 
@@ -21,7 +21,7 @@ public/index.html
 這是一個可複製的通用入口底板：
 
 ```text
-Reward Gateway
+Human Quest
 = 私域會員入口
 + 信箱收集
 + 推薦碼
@@ -51,7 +51,7 @@ Reward Gateway
 - Invite Code / 推薦碼輸入
 - Member ID / 會員 ID
 - Referral Code / 專屬推薦碼
-- Redeemable Points / 可兌換分數
+- HQ Points / 可兌換分數
 - Tickets / 票券
 - Daily Spin / 每日轉盤
 - Redeem Center / 兌換中心
