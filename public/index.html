@@ -373,6 +373,85 @@
         margin-top: 12px;
       }
 
+      .smash-wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 240px;
+        gap: 14px;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .smash-stage {
+        min-height: 210px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background:
+          radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.22), transparent 22%),
+          linear-gradient(135deg, rgba(246, 167, 42, 0.18), rgba(240, 93, 47, 0.08));
+      }
+
+      .smash-target {
+        width: min(360px, 92%);
+        min-height: 130px;
+        display: grid;
+        place-items: center;
+        border: 3px solid rgba(246, 167, 42, 0.9);
+        border-radius: 28px 28px 18px 18px;
+        color: #fff7df;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 38%),
+          linear-gradient(135deg, #ef4444, #7c2d12);
+        box-shadow: 0 18px 0 rgba(0, 0, 0, 0.18), var(--shadow);
+        font-size: 52px;
+        font-weight: 900;
+        user-select: none;
+        cursor: pointer;
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+
+      .smash-target.hit {
+        transform: translateY(5px) rotate(-1deg) scale(0.98);
+        filter: brightness(1.18);
+      }
+
+      .smash-target.broken {
+        transform: rotate(-4deg) scale(0.94);
+        filter: grayscale(0.65) brightness(0.8);
+      }
+
+      .hp-track {
+        overflow: hidden;
+        height: 16px;
+        margin: 10px 0;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.22);
+      }
+
+      .hp-fill {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #22c55e, #facc15, #ef4444);
+        transition: width 180ms ease;
+      }
+
+      .smash-stats {
+        display: grid;
+        gap: 8px;
+      }
+
+      .smash-stat {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
       .wheel {
         position: relative;
         width: 240px;
@@ -525,7 +604,8 @@
         .form-grid,
         .contact-strip,
         .game-grid,
-        .wheel-wrap {
+        .wheel-wrap,
+        .smash-wrap {
           grid-template-columns: 1fr;
         }
 
@@ -656,6 +736,32 @@
         </div>
       </section>
 
+      <section class="drawer" id="smashDrawer">
+        <div class="drawer-inner">
+          <h2>Stress Smash</h2>
+          <p class="hint">Tap to smash, earn HQ Points, and share your pass. This is the first playable Mini App game slot.</p>
+          <div class="smash-wrap">
+            <div class="smash-stage">
+              <button class="smash-target" id="smashTarget" type="button">WLD</button>
+            </div>
+            <div>
+              <div class="smash-stats">
+                <div class="smash-stat"><span>Target HP</span><strong><span id="smashHp">100</span>%</strong></div>
+                <div class="smash-stat"><span>Hits</span><strong id="smashHits">0</strong></div>
+                <div class="smash-stat"><span>Reward</span><strong>+1 point / hit</strong></div>
+              </div>
+              <div class="hp-track"><div class="hp-fill" id="smashHpFill"></div></div>
+              <p class="hint" id="smashText">Break the target once to unlock +1 Spin Credit.</p>
+              <div class="balance-actions">
+                <button id="smashHit">Smash</button>
+                <button class="ghost" id="smashShare">Share</button>
+                <button class="ghost" id="smashReset">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="drawer" id="quickDrawer">
         <div class="drawer-inner">
           <h2 id="quickTitle">Panel</h2>
@@ -763,7 +869,7 @@
 
       const gameCopy = {
         en: [
-          ['HOT', 'WLD Mini App', 'First chain entry slot. Connect World App, World ID, airdrop, or WLD campaign flow here.', '◎', '#ff7a59', '#ffd166'],
+          ['HOT', 'WLD Stress Smash', 'A simple tap-to-smash mini game slot for WLD / World App clones.', 'SMASH', '#ff7a59', '#ffd166'],
           ['HOT', 'Daily Spin', 'Core spin module included in every clone.', '◉', '#7c3aed', '#22d3ee'],
           ['NEW', 'Follow X Quest', 'Follow @G9Yeu21 to unlock +1 spin credit. This task slot is reusable for every clone.', '✦', '#0f766e', '#84cc16'],
           ['NEW', 'Invite Race', 'Referral leaderboard and direct member tracking.', '⇄', '#2563eb', '#f97316'],
@@ -788,7 +894,7 @@
 
       const stateKey = 'rewardArcadeShell';
       let lang = localStorage.getItem('arcadeLang') || 'en';
-      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0,"spinCredits":0,"welcomeSpinGranted":false,"followXClaimed":false}');
+      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0,"spinCredits":0,"welcomeSpinGranted":false,"followXClaimed":false,"smashHp":100,"smashHits":0,"smashClearRewarded":false}');
 
       function save() {
         localStorage.setItem(stateKey, JSON.stringify(state));
@@ -821,6 +927,20 @@
         } else {
           referralLine.hidden = true;
         }
+        renderSmash();
+      }
+
+      function renderSmash() {
+        const hp = Math.max(0, Number(state.smashHp ?? 100));
+        const hpText = document.querySelector('#smashHp');
+        if (!hpText) return;
+        document.querySelector('#smashHp').textContent = hp;
+        document.querySelector('#smashHits').textContent = state.smashHits || 0;
+        document.querySelector('#smashHpFill').style.width = `${hp}%`;
+        document.querySelector('#smashTarget').classList.toggle('broken', hp <= 0);
+        document.querySelector('#smashText').textContent = hp <= 0
+          ? (state.smashClearRewarded ? 'Target broken. Share your pass or reset for another round.' : 'Target broken. Spin Credit unlocked.')
+          : 'Break the target once to unlock +1 Spin Credit.';
       }
 
       function show(data) {
@@ -897,14 +1017,16 @@
           `;
           card.querySelector('button').addEventListener('click', async () => {
             if (index === 0) {
-              const backend = await logEvent('wld_mini_app_entry', title, {
+              openDrawer('smashDrawer');
+              renderSmash();
+              const backend = await logEvent('stress_smash_opened', title, {
                 chain: 'WLD',
-                slot: 'first_chain_card',
-                placeholder: true
+                slot: 'first_playable_game',
+                miniAppReady: true
               });
               show({
                 slot: title,
-                status: 'WLD Mini App slot ready. Add the official World App URL or MiniKit flow here.',
+                status: 'Stress Smash is ready. Tap the target, earn points, and share your pass.',
                 memberId: state.memberId,
                 points: state.points,
                 tickets: state.tickets,
@@ -1006,6 +1128,66 @@
           spinCredits: state.spinCredits || 0,
           backend
         });
+      });
+
+      async function hitSmashTarget() {
+        if (Number(state.smashHp ?? 100) <= 0) {
+          renderSmash();
+          show({ action: 'stress smash', status: 'target already broken', memberId: state.memberId });
+          return;
+        }
+        const damage = 9 + Math.floor(Math.random() * 13);
+        state.smashHp = Math.max(0, Number(state.smashHp ?? 100) - damage);
+        state.smashHits = Number(state.smashHits || 0) + 1;
+        state.points = Number(state.points || 0) + 1;
+        const target = document.querySelector('#smashTarget');
+        target.classList.add('hit');
+        setTimeout(() => target.classList.remove('hit'), 140);
+        let backend = null;
+        if (state.smashHp <= 0 && !state.smashClearRewarded) {
+          state.spinCredits = Number(state.spinCredits || 0) + 1;
+          state.smashClearRewarded = true;
+          backend = await logReward('stress_smash_clear', state.smashHits, 0, {
+            game: 'stress_smash',
+            spinCreditsGranted: 1,
+            hits: state.smashHits
+          });
+        }
+        save();
+        show({
+          action: 'stress smash hit',
+          damage,
+          hp: state.smashHp,
+          hits: state.smashHits,
+          points: state.points,
+          spinCredits: state.spinCredits,
+          backend
+        });
+      }
+
+      document.querySelector('#smashTarget').addEventListener('click', hitSmashTarget);
+      document.querySelector('#smashHit').addEventListener('click', hitSmashTarget);
+      document.querySelector('#smashReset').addEventListener('click', async () => {
+        state.smashHp = 100;
+        state.smashHits = 0;
+        save();
+        const backend = await logEvent('stress_smash_reset', 'Stress Smash', {});
+        show({ action: 'stress smash reset', memberId: state.memberId, backend });
+      });
+      document.querySelector('#smashShare').addEventListener('click', async () => {
+        const shareUrl = `${location.origin}${location.pathname}?ref=${encodeURIComponent(state.referralCode || state.memberId)}`;
+        const shareData = {
+          title: 'Human Quest - Stress Smash',
+          text: `Join my Human Quest pass: ${state.referralCode || state.memberId}`,
+          url: shareUrl
+        };
+        if (navigator.share) {
+          await navigator.share(shareData).catch(() => null);
+        } else {
+          await navigator.clipboard?.writeText(shareUrl).catch(() => null);
+        }
+        const backend = await logEvent('stress_smash_shared', 'Stress Smash', { shareUrl });
+        show({ action: 'stress smash shared', shareUrl, backend });
       });
 
       document.querySelector('#spinNow').addEventListener('click', async () => {
