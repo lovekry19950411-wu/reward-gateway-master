@@ -69,6 +69,8 @@ http://localhost:3000
 
 30-60-90 天執行路線圖在 `WLD_TREASURE_90_DAY_ROADMAP.md`。
 
+如果 Vercel billing 擋住部署，改用 Cloudflare Pages，設定看 `CLOUDFLARE_DEPLOY.md`。
+
 正式接 World ID 時，請把 IDKit 驗證成功後的結果送到 `/api/world-id/register`。目前頁面先提供測試輸入，方便確認 Airtable 寫入流程。
 
 ## API 端點
