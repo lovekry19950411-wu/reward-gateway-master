@@ -746,6 +746,7 @@
             </div>
             <div>
               <div class="smash-stats">
+                <div class="smash-stat"><span>Target</span><strong id="smashName">Stress</strong></div>
                 <div class="smash-stat"><span>Target HP</span><strong><span id="smashHp">100</span>%</strong></div>
                 <div class="smash-stat"><span>Hits</span><strong id="smashHits">0</strong></div>
                 <div class="smash-stat"><span>Reward</span><strong>+1 point / hit</strong></div>
@@ -894,7 +895,19 @@
 
       const stateKey = 'rewardArcadeShell';
       let lang = localStorage.getItem('arcadeLang') || 'en';
-      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0,"spinCredits":0,"welcomeSpinGranted":false,"followXClaimed":false,"smashHp":100,"smashHits":0,"smashClearRewarded":false}');
+      const smashTargets = [
+        { name: 'Mental Load', icon: 'TODO' },
+        { name: 'Unpaid Chores', icon: 'DISH' },
+        { name: 'Creepy DM', icon: 'DM' },
+        { name: 'Pay Gap', icon: 'PAY' },
+        { name: 'Meeting Interrupt', icon: 'MUTE' },
+        { name: 'Beauty Pressure', icon: 'LOOK' },
+        { name: 'Safety Anxiety', icon: 'SAFE' },
+        { name: 'Toxic Comment', icon: 'NOPE' },
+        { name: 'Time Stress', icon: 'TIME' },
+        { name: 'Life Admin', icon: 'FORM' }
+      ];
+      let state = JSON.parse(localStorage.getItem(stateKey) || '{"points":0,"tickets":0,"memberId":"Guest-0001","email":"","inviteCode":"","referralCode":"","spinRotation":0,"spinCredits":0,"welcomeSpinGranted":false,"followXClaimed":false,"smashHp":100,"smashHits":0,"smashClearRewarded":false,"smashTargetIndex":0}');
 
       function save() {
         localStorage.setItem(stateKey, JSON.stringify(state));
@@ -935,6 +948,9 @@
         const hpText = document.querySelector('#smashHp');
         if (!hpText) return;
         document.querySelector('#smashHp').textContent = hp;
+        const targetData = smashTargets[Number(state.smashTargetIndex || 0) % smashTargets.length];
+        document.querySelector('#smashName').textContent = targetData.name;
+        document.querySelector('#smashTarget').textContent = targetData.icon;
         document.querySelector('#smashHits').textContent = state.smashHits || 0;
         document.querySelector('#smashHpFill').style.width = `${hp}%`;
         document.querySelector('#smashTarget').classList.toggle('broken', hp <= 0);
@@ -1170,8 +1186,9 @@
       document.querySelector('#smashReset').addEventListener('click', async () => {
         state.smashHp = 100;
         state.smashHits = 0;
+        state.smashTargetIndex = (Number(state.smashTargetIndex || 0) + 1) % smashTargets.length;
         save();
-        const backend = await logEvent('stress_smash_reset', 'Stress Smash', {});
+        const backend = await logEvent('stress_smash_reset', 'Stress Smash', { target: smashTargets[state.smashTargetIndex].name });
         show({ action: 'stress smash reset', memberId: state.memberId, backend });
       });
       document.querySelector('#smashShare').addEventListener('click', async () => {
