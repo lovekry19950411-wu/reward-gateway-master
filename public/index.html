@@ -763,7 +763,7 @@
 
       const gameCopy = {
         en: [
-          ['HOT', 'Lucky Box', 'Open boxes with tickets. Placeholder for reward logic.', '▰', '#ff7a59', '#ffd166'],
+          ['HOT', 'WLD Mini App', 'First chain entry slot. Connect World App, World ID, airdrop, or WLD campaign flow here.', '◎', '#ff7a59', '#ffd166'],
           ['HOT', 'Daily Spin', 'Core spin module included in every clone.', '◉', '#7c3aed', '#22d3ee'],
           ['NEW', 'Follow X Quest', 'Follow @G9Yeu21 to unlock +1 spin credit. This task slot is reusable for every clone.', '✦', '#0f766e', '#84cc16'],
           ['NEW', 'Invite Race', 'Referral leaderboard and direct member tracking.', '⇄', '#2563eb', '#f97316'],
@@ -897,13 +897,14 @@
           `;
           card.querySelector('button').addEventListener('click', async () => {
             if (index === 0) {
-              state.points += 8;
-              state.tickets += 1;
-              save();
-              const backend = await logReward('lucky_box', 8, 1, { slot: title });
+              const backend = await logEvent('wld_mini_app_entry', title, {
+                chain: 'WLD',
+                slot: 'first_chain_card',
+                placeholder: true
+              });
               show({
                 slot: title,
-                status: 'prototype action complete',
+                status: 'WLD Mini App slot ready. Add the official World App URL or MiniKit flow here.',
                 memberId: state.memberId,
                 points: state.points,
                 tickets: state.tickets,
